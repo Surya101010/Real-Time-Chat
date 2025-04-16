@@ -16,8 +16,9 @@ const server = http_1.default.createServer(function (request, response) {
 });
 const userManager = new UserManager_1.UserManager();
 const store = new InMemoryStore_1.InMemoryStore();
-server.listen(8080, function () {
-    console.log((new Date()) + ' Server is listening on port 8080');
+
+server.listen(8081, function() {
+    console.log((new Date()) + ' Server is listening on port 8081');
 });
 const wsServer = new websocket_1.server({
     httpServer: server,
@@ -33,7 +34,7 @@ wsServer.on('request', function (request) {
         console.log((new Date()) + ' Connection from origin ' + request.origin + ' rejected.');
         return;
     }
-    var connection = request.accept('echo-protocol', request.origin);
+    var connection = request.accept( null,request.origin);
     console.log((new Date()) + ' Connection accepted.');
     connection.on('message', function (message) {
         if (message.type === 'utf8') {

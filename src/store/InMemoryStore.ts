@@ -1,51 +1,67 @@
 import { Chat, Store, UserId } from "./Store";
-let globalChatId=0;
-export interface Room{
-    roomId:string;
-    chats:Chat[];
+let globalChatId = 0;
+
+export interface Room {
+    roomId: string;
+    chats: Chat[]
 }
-export  class InMemoryStore implements Store{
-    private store: Map<string,Room>;
-    constructor(){
-        this.store = new Map<string,Room>()
+
+export class InMemoryStore implements Store {
+    private store: Map<string, Room>;
+
+    constructor() {
+        this.store = new Map<string, Room>()
     }
-    initRoom(roomId:string){
-        this.store.set(roomId,{
+
+    initRoom(roomId: string) {
+        this.store.set(roomId, {
             roomId,
-            chats:[]
+            chats: []
         });
     }
-    getChats(roomId: string, limit:number, offset:number){
+
+    getChats(roomId: string, limit: number, offset: number) {
         const room = this.store.get(roomId);
-        if(!room){
+        if (!room) {
             return []
         }
-        return room.chats.reverse().slice(0,offset).slice(-1* limit);
+        return room.chats.reverse().slice(0, offset).slice(-1 * limit);
     }
-    addChat(userId:UserId,name:string, roomId:string,message:string){
-        const room = this.store.get(roomId);
-        if(!room){
-            return null
+
+    addChat(userId: UserId, name: string, roomId: string, message: string) {
+        if (!this.store.get(roomId)) {
+            this.initRoom(roomId);
         }
-        const chat ={
-            id:(globalChatId++).toString(),
+        const room = this.store.get(roomId);
+        if (!room) {
+            return;
+        }
+        const chat = {
+            id: (globalChatId++).toString(),
             userId,
             name,
             message,
-            upvotes:[]            
+            upvotes: []
         }
         room.chats.push(chat)
         return chat;
     }
-    upvote(userId:UserId,roomId:string,chatId: string){
+
+    upvote(userId: UserId, roomId: string, chatId: string) {
         const room = this.store.get(roomId);
-        if(!room){
+        if (!room) {
             return 
         }
-        const chat =room.chats.find(({id})=> id  === chatId);
-        if(chat){
-            chat.upvotes.push(userId)
+        // Todo: Make this faster
+        const chat = room.chats.find(({id}) => id == chatId);
+
+        if (chat) {
+            if (chat.upvotes.find(x => x === userId)) {
+                return chat;
+            }
+            chat.upvotes.push(userId);
         }
         return chat;
     }
+
 }
